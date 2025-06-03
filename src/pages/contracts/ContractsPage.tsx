@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Plus, 
-  Filter, 
-  Download, 
-  ArrowDown, 
-  ArrowUp, 
+import {
+  Search,
+  Plus,
+  Filter,
+  ArrowDown,
+  ArrowUp,
   Car,
   CircleDollarSign,
   Clock
@@ -54,7 +53,7 @@ export function ContractsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  
+
   const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -63,21 +62,21 @@ export function ContractsPage() {
       setSortDirection('asc');
     }
   };
-  
+
   const getSortIcon = (field: string) => {
     if (sortField !== field) return null;
     return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
   };
-  
-  const filteredContracts = mockContracts.filter(contract => 
+
+  const filteredContracts = mockContracts.filter(contract =>
     contract.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contract.registration_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contract.policy_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   const activeContracts = filteredContracts.filter(contract => contract.status === 'active');
   const expiredContracts = filteredContracts.filter(contract => contract.status === 'expired');
-  
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -92,12 +91,12 @@ export function ContractsPage() {
           Nouveau contrat
         </Button>
       </div>
-      
+
       <div className="flex flex-col gap-4 md:flex-row">
         <div className="relative w-full md:w-64">
           <Search className="absolute top-0 left-3 h-full text-gray-400" size={18} />
-          <Input 
-            placeholder="Rechercher un contrat..." 
+          <Input
+            placeholder="Rechercher un contrat..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -108,14 +107,14 @@ export function ContractsPage() {
           Filtrer
         </Button>
       </div>
-      
+
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList>
           <TabsTrigger value="active">Actifs ({activeContracts.length})</TabsTrigger>
           <TabsTrigger value="expired">Expirés ({expiredContracts.length})</TabsTrigger>
           <TabsTrigger value="all">Tous ({filteredContracts.length})</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="active" className="space-y-4">
           {activeContracts.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -127,7 +126,7 @@ export function ContractsPage() {
             <EmptyState />
           )}
         </TabsContent>
-        
+
         <TabsContent value="expired" className="space-y-4">
           {expiredContracts.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -139,7 +138,7 @@ export function ContractsPage() {
             <EmptyState message="Aucun contrat expiré" />
           )}
         </TabsContent>
-        
+
         <TabsContent value="all" className="space-y-4">
           {filteredContracts.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -171,7 +170,7 @@ interface ContractCardProps {
 
 function ContractCard({ contract }: ContractCardProps) {
   const daysRemaining = contract.status === 'active' ? calculateDaysRemaining(contract.end_date) : 0;
-  
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -190,14 +189,14 @@ function ContractCard({ contract }: ContractCardProps) {
             </div>
           </div>
           <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            contract.status === 'active' 
-              ? 'bg-teal-100 text-teal-800' 
+            contract.status === 'active'
+              ? 'bg-teal-100 text-teal-800'
               : 'bg-red-100 text-red-800'
           }`}>
             {contract.status === 'active' ? 'Actif' : 'Expiré'}
           </span>
         </div>
-        
+
         <div className="space-y-3 mb-4">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">Numéro de police</span>
@@ -206,21 +205,19 @@ function ContractCard({ contract }: ContractCardProps) {
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">Prime annuelle</span>
             <div className="flex items-center gap-1">
-              <CircleDollarSign className="w-3 h-3 text-orange-500" />
               <span className="text-sm font-medium">{formatCurrency(contract.premium_amount)}</span>
             </div>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">Période de validité</span>
             <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-orange-500" />
               <span className="text-sm font-medium">
                 {formatDate(contract.start_date)} - {formatDate(contract.end_date)}
               </span>
             </div>
           </div>
         </div>
-        
+
         {contract.status === 'active' && (
           <div className="mb-4 p-2 bg-orange-50 rounded-md">
             <div className="flex items-center justify-between">
@@ -232,19 +229,18 @@ function ContractCard({ contract }: ContractCardProps) {
               </span>
             </div>
             <div className="mt-1 w-full bg-orange-200 rounded-full h-1.5">
-              <div 
-                className="bg-orange-500 h-1.5 rounded-full" 
-                style={{ 
-                  width: `${Math.min(100, (daysRemaining / 365) * 100)}%` 
+              <div
+                className="bg-orange-500 h-1.5 rounded-full"
+                style={{
+                  width: `${Math.min(100, (daysRemaining / 365) * 100)}%`
                 }}
               ></div>
             </div>
           </div>
         )}
-        
+
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1 gap-1">
-            <Download className="w-4 h-4" />
             Vignette
           </Button>
           <Button variant={contract.status === 'active' ? 'default' : 'secondary'} className="flex-1">
