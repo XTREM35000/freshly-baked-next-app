@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-    'process.env.SUPPRESS_ROUTER_WARNINGS': 'true'
+    'process.env.SUPPRESS_ROUTER_WARNINGS': 'true',
+    '__WS_TOKEN__': JSON.stringify(process.env.WS_TOKEN || '')
   }
 }));

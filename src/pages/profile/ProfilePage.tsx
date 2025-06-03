@@ -1,14 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
-import { User, Phone, Mail, Camera, Loader2, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AvatarUpload } from '@/components/ui/avatar-upload';
 import { useAuthStore } from '@/store/authStore';
-import { supabase, getFullName, uploadAvatar } from '@/lib/supabase';
-import { motion } from 'framer-motion';
-import { Avatar } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export function ProfilePage() {

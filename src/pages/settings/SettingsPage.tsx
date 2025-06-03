@@ -1,432 +1,198 @@
-import React, { useState } from 'react';
-import { 
-  Settings, 
-  Building, 
-  Users, 
-  Bell, 
-  Shield, 
+
+import { useState } from 'react';
+import {
+  Save,
   Database,
-  Mail,
-  Phone,
-  Globe,
-  CreditCard,
-  Save
+  Globe
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useAuthStore } from '@/store/authStore';
+import { toast } from 'sonner';
 
 export function SettingsPage() {
-  const [companySettings, setCompanySettings] = useState({
-    name: 'Gogo AutoAssure Abidjan',
-    email: 'contact@gogoautoassure.ci',
-    phone: '+225 27 20 30 40 50',
-    address: 'Cocody Riviera 3, Abidjan',
-    website: 'www.gogoautoassure.ci',
-    rccm: 'CI-ABJ-2023-B-12345',
-    taxId: '2023456789',
+  const { user } = useAuthStore();
+  const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState({
+    companyName: 'G3A Assurances',
+    companyAddress: 'Abidjan, Côte d\'Ivoire',
+    companyPhone: '+225 XX XX XX XX XX',
+    companyEmail: 'contact@g3a-assurances.ci',
+    language: 'fr',
+    currency: 'XOF',
+    timezone: 'Africa/Abidjan'
   });
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: true,
-    contractReminders: true,
-    paymentReminders: true,
-    marketingEmails: false,
-  });
-
-  const [paymentSettings, setPaymentSettings] = useState({
-    orangeMoney: true,
-    mtnMoney: true,
-    moovMoney: true,
-    wave: true,
-    bankTransfer: true,
-  });
-
-  const handleCompanySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement company settings update
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // Simuler la sauvegarde
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('Paramètres sauvegardés avec succès');
+    } catch (error) {
+      toast.error('Erreur lors de la sauvegarde');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleNotificationToggle = (setting: keyof typeof notificationSettings) => {
-    setNotificationSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }));
-  };
-
-  const handlePaymentToggle = (method: keyof typeof paymentSettings) => {
-    setPaymentSettings(prev => ({
-      ...prev,
-      [method]: !prev[method]
-    }));
-  };
+  if (!user || !user.permissions?.includes('manage_system')) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-lg text-gray-500">Accès non autorisé</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Paramètres</h1>
         <p className="text-gray-500">
-          Gérez les paramètres de votre entreprise et de l'application
+          Configurez les paramètres généraux de l'application
         </p>
       </div>
 
-      <Tabs defaultValue="company" className="space-y-4">
+      <Tabs defaultValue="general" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="company">Entreprise</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="payments">Paiements</TabsTrigger>
-          <TabsTrigger value="security">Sécurité</TabsTrigger>
+          <TabsTrigger value="general">Général</TabsTrigger>
+          <TabsTrigger value="database">Base de données</TabsTrigger>
+          <TabsTrigger value="localization">Localisation</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="company">
+        <TabsContent value="general" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Informations de l'entreprise</CardTitle>
               <CardDescription>
-                Gérez les informations de base de votre entreprise
+                Configurez les informations de base de votre entreprise
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCompanySubmit} className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-                      Nom de l'entreprise
-                    </label>
-                    <div className="mt-1 relative">
-                      <Input
-                        id="companyName"
-                        value={companySettings.name}
-                        onChange={(e) => setCompanySettings({ ...companySettings, name: e.target.value })}
-                      />
-                      <Building className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="companyEmail" className="block text-sm font-medium text-gray-700">
-                      Email
-                    </label>
-                    <div className="mt-1 relative">
-                      <Input
-                        id="companyEmail"
-                        type="email"
-                        value={companySettings.email}
-                        onChange={(e) => setCompanySettings({ ...companySettings, email: e.target.value })}
-                      />
-                      <Mail className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="companyPhone" className="block text-sm font-medium text-gray-700">
-                      Téléphone
-                    </label>
-                    <div className="mt-1 relative">
-                      <Input
-                        id="companyPhone"
-                        value={companySettings.phone}
-                        onChange={(e) => setCompanySettings({ ...companySettings, phone: e.target.value })}
-                      />
-                      <Phone className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="companyWebsite" className="block text-sm font-medium text-gray-700">
-                      Site web
-                    </label>
-                    <div className="mt-1 relative">
-                      <Input
-                        id="companyWebsite"
-                        value={companySettings.website}
-                        onChange={(e) => setCompanySettings({ ...companySettings, website: e.target.value })}
-                      />
-                      <Globe className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="companyRccm" className="block text-sm font-medium text-gray-700">
-                      RCCM
-                    </label>
-                    <div className="mt-1 relative">
-                      <Input
-                        id="companyRccm"
-                        value={companySettings.rccm}
-                        onChange={(e) => setCompanySettings({ ...companySettings, rccm: e.target.value })}
-                      />
-                      <Database className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="companyTaxId" className="block text-sm font-medium text-gray-700">
-                      Numéro fiscal
-                    </label>
-                    <div className="mt-1 relative">
-                      <Input
-                        id="companyTaxId"
-                        value={companySettings.taxId}
-                        onChange={(e) => setCompanySettings({ ...companySettings, taxId: e.target.value })}
-                      />
-                      <Database className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                    </div>
-                  </div>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium">Nom de l'entreprise</label>
+                  <Input
+                    value={settings.companyName}
+                    onChange={(e) => setSettings({ ...settings, companyName: e.target.value })}
+                  />
                 </div>
-
-                <div className="flex justify-end">
-                  <Button type="submit">
-                    <Save className="w-4 h-4 mr-2" />
-                    Enregistrer les modifications
-                  </Button>
+                <div>
+                  <label className="text-sm font-medium">Téléphone</label>
+                  <Input
+                    value={settings.companyPhone}
+                    onChange={(e) => setSettings({ ...settings, companyPhone: e.target.value })}
+                  />
                 </div>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <Card>
-            <CardHeader>
-              <CardTitle>Paramètres de notification</CardTitle>
-              <CardDescription>
-                Gérez comment et quand vous recevez des notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Notifications par email</h3>
-                    <p className="text-sm text-gray-500">Recevoir des notifications par email</p>
-                  </div>
-                  <Button
-                    variant={notificationSettings.emailNotifications ? "default" : "outline"}
-                    onClick={() => handleNotificationToggle('emailNotifications')}
-                  >
-                    {notificationSettings.emailNotifications ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Notifications SMS</h3>
-                    <p className="text-sm text-gray-500">Recevoir des notifications par SMS</p>
-                  </div>
-                  <Button
-                    variant={notificationSettings.smsNotifications ? "default" : "outline"}
-                    onClick={() => handleNotificationToggle('smsNotifications')}
-                  >
-                    {notificationSettings.smsNotifications ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Rappels de contrat</h3>
-                    <p className="text-sm text-gray-500">Notifications pour les échéances de contrat</p>
-                  </div>
-                  <Button
-                    variant={notificationSettings.contractReminders ? "default" : "outline"}
-                    onClick={() => handleNotificationToggle('contractReminders')}
-                  >
-                    {notificationSettings.contractReminders ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Rappels de paiement</h3>
-                    <p className="text-sm text-gray-500">Notifications pour les échéances de paiement</p>
-                  </div>
-                  <Button
-                    variant={notificationSettings.paymentReminders ? "default" : "outline"}
-                    onClick={() => handleNotificationToggle('paymentReminders')}
-                  >
-                    {notificationSettings.paymentReminders ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Emails marketing</h3>
-                    <p className="text-sm text-gray-500">Recevoir des offres et promotions</p>
-                  </div>
-                  <Button
-                    variant={notificationSettings.marketingEmails ? "default" : "outline"}
-                    onClick={() => handleNotificationToggle('marketingEmails')}
-                  >
-                    {notificationSettings.marketingEmails ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Adresse</label>
+                <Input
+                  value={settings.companyAddress}
+                  onChange={(e) => setSettings({ ...settings, companyAddress: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  type="email"
+                  value={settings.companyEmail}
+                  onChange={(e) => setSettings({ ...settings, companyEmail: e.target.value })}
+                />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="payments">
+        <TabsContent value="database" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Méthodes de paiement</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                Gestion de la base de données
+              </CardTitle>
               <CardDescription>
-                Gérez les méthodes de paiement acceptées
+                Outils d'administration de la base de données
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-orange-100 rounded-md">
-                      <CreditCard className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">Orange Money</h3>
-                      <p className="text-sm text-gray-500">Paiement via Orange Money</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={paymentSettings.orangeMoney ? "default" : "outline"}
-                    onClick={() => handlePaymentToggle('orangeMoney')}
-                  >
-                    {paymentSettings.orangeMoney ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-yellow-100 rounded-md">
-                      <CreditCard className="w-5 h-5 text-yellow-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">MTN Mobile Money</h3>
-                      <p className="text-sm text-gray-500">Paiement via MTN Money</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={paymentSettings.mtnMoney ? "default" : "outline"}
-                    onClick={() => handlePaymentToggle('mtnMoney')}
-                  >
-                    {paymentSettings.mtnMoney ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-md">
-                      <CreditCard className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">Moov Money</h3>
-                      <p className="text-sm text-gray-500">Paiement via Moov Money</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={paymentSettings.moovMoney ? "default" : "outline"}
-                    onClick={() => handlePaymentToggle('moovMoney')}
-                  >
-                    {paymentSettings.moovMoney ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-teal-100 rounded-md">
-                      <CreditCard className="w-5 h-5 text-teal-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">Wave</h3>
-                      <p className="text-sm text-gray-500">Paiement via Wave</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={paymentSettings.wave ? "default" : "outline"}
-                    onClick={() => handlePaymentToggle('wave')}
-                  >
-                    {paymentSettings.wave ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-100 rounded-md">
-                      <CreditCard className="w-5 h-5 text-gray-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">Virement bancaire</h3>
-                      <p className="text-sm text-gray-500">Paiement par virement bancaire</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={paymentSettings.bankTransfer ? "default" : "outline"}
-                    onClick={() => handlePaymentToggle('bankTransfer')}
-                  >
-                    {paymentSettings.bankTransfer ? 'Activé' : 'Désactivé'}
-                  </Button>
-                </div>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-4">
+                <Button variant="outline" className="justify-start">
+                  Sauvegarder la base de données
+                </Button>
+                <Button variant="outline" className="justify-start">
+                  Restaurer la base de données
+                </Button>
+                <Button variant="destructive" className="justify-start">
+                  Réinitialiser la base de données
+                </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="security">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Authentification</CardTitle>
-                <CardDescription>
-                  Gérez les paramètres d'authentification
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Double authentification</h3>
-                    <p className="text-sm text-gray-500">Sécurisez votre compte avec la 2FA</p>
-                  </div>
-                  <Button variant="outline">Configurer</Button>
+        <TabsContent value="localization" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                Paramètres de localisation
+              </CardTitle>
+              <CardDescription>
+                Configurez la langue, la devise et le fuseau horaire
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="text-sm font-medium">Langue</label>
+                  <select
+                    value={settings.language}
+                    onChange={(e) => setSettings({ ...settings, language: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                  </select>
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Sessions actives</h3>
-                    <p className="text-sm text-gray-500">Gérez vos sessions connectées</p>
-                  </div>
-                  <Button variant="outline">Voir les sessions</Button>
+                <div>
+                  <label className="text-sm font-medium">Devise</label>
+                  <select
+                    value={settings.currency}
+                    onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="XOF">Franc CFA (XOF)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                    <option value="USD">Dollar US (USD)</option>
+                  </select>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Permissions</CardTitle>
-                <CardDescription>
-                  Gérez les rôles et permissions des utilisateurs
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Rôles utilisateurs</h3>
-                    <p className="text-sm text-gray-500">Configurez les rôles</p>
-                  </div>
-                  <Button variant="outline">Gérer les rôles</Button>
+                <div>
+                  <label className="text-sm font-medium">Fuseau horaire</label>
+                  <select
+                    value={settings.timezone}
+                    onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Africa/Abidjan">Abidjan (GMT)</option>
+                    <option value="Europe/Paris">Paris (CET)</option>
+                    <option value="America/New_York">New York (EST)</option>
+                  </select>
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Permissions</h3>
-                    <p className="text-sm text-gray-500">Définissez les permissions</p>
-                  </div>
-                  <Button variant="outline">Gérer les permissions</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="flex justify-end">
+        <Button onClick={handleSave} disabled={loading}>
+          <Save className="w-4 h-4 mr-2" />
+          {loading ? 'Sauvegarde...' : 'Sauvegarder'}
+        </Button>
+      </div>
     </div>
   );
 }

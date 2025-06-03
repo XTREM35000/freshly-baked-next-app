@@ -1,93 +1,64 @@
+
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = 'https://gezrcuwrspltcjdeswcp.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlenJjdXdyc3BsdGNqZGVzd2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMxOTQwMzMsImV4cCI6MjA0ODc3MDAzM30.PH8HTMgGzz5K0uDQZDHoE56xb4cqO2U_LmOsOqhkWio';
 
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Loaded' : 'Not Loaded');
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-// Enable debug mode in development
-const supabaseOptions = {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  },
-  db: {
-    schema: 'public'
-  },
-  logger: {
-    level: 'debug',
-    native: true
-  }
-};
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, supabaseOptions);
-
-export type UserStatus = 'pending' | 'active' | 'suspended' | 'blocked';
 export type UserRole = 'admin' | 'agent' | 'user';
 
-export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  admin: ['manage_system', 'manage_agents', 'manage_clients', 'manage_contracts'],
-  agent: ['manage_clients', 'manage_contracts'],
-  user: ['view_contracts']
-};
-
-export interface UserProfile {
+export interface User {
   id: string;
   email: string;
   first_name: string;
   last_name: string;
   phone: string;
-  status: UserStatus;
   role: UserRole;
-  display_name: string;
+  status: string;
   avatar_url?: string;
-  created_at: string;
-  updated_at: string;
-  agency_id?: string;
-  permissions?: string[];
+  permissions: string[];
 }
 
-export const formatPhoneNumber = (phone: string): string => {
-  // Remove any non-digit characters
-  const digits = phone.replace(/\D/g, '');
+export function getFullName(user: User): string {
+  return `${user.first_name} ${user.last_name}`.trim();
+}
 
-  // If it already includes the country code
-  if (digits.startsWith('225')) {
-    return `+${digits}`;
+export function formatPhoneNumber(phone: string): string {
+  // Remove all non-digit characters
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Add +225 prefix if not present for Ivory Coast numbers
+  if (cleaned.length === 10 && !cleaned.startsWith('225')) {
+    return `+225${cleaned}`;
+  } else if (cleaned.length === 13 && cleaned.startsWith('225')) {
+    return `+${cleaned}`;
   }
+  
+  return phone;
+}
 
-  // Add the country code if not present
-  return `+225${digits}`;
-};
-
-export const validatePhoneNumber = (phone: string): boolean => {
-  const phoneRegex = /^\+225[0-9]{10}$/;
-  return phoneRegex.test(formatPhoneNumber(phone));
-};
-
-export const getFullName = (profile: UserProfile): string => {
-  return `${profile.first_name} ${profile.last_name}`.trim();
-};
+export function validatePhoneNumber(phone: string): boolean {
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Check for valid Ivory Coast phone number formats
+  return (
+    (cleaned.length === 10) || 
+    (cleaned.length === 13 && cleaned.startsWith('225'))
+  );
+}
 
 export async function uploadAvatar(file: File, userId: string): Promise<string | null> {
   try {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Math.random()}.${fileExt}`;
+    const fileName = `${userId}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(filePath, file);
+      .upload(filePath, file, { upsert: true });
 
-    if (uploadError) {
-      throw uploadError;
-    }
+    if (uploadError) throw uploadError;
 
     const { data } = supabase.storage
       .from('avatars')

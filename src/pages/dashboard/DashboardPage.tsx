@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
-  Car,
   CircleDollarSign,
   FileText,
   AlertTriangle,
-  Calendar,
   ChevronRight,
   ArrowUpRight
 } from 'lucide-react';
@@ -120,13 +118,24 @@ export function DashboardPage() {
     );
   }
 
+  // Protection contre user null
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="text-lg">Chargement des informations utilisateur...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Tableau de bord</h1>
           <p className="text-gray-500">
-            Bienvenue, {`${user.first_name} ${user.last_name}`}. Voici un aperçu de vos assurances.
+            Bienvenue, {user.first_name} {user.last_name}. Voici un aperçu de vos assurances.
           </p>
         </div>
         <Button className="shrink-0">

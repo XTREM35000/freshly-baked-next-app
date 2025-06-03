@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Search,
   Plus,
   Filter,
-  ArrowDown,
-  ArrowUp,
+  Download,
   Car,
   CircleDollarSign,
   Clock
@@ -12,81 +11,76 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate, calculateDaysRemaining } from '@/lib/utils';
 
-// Mock data
-const mockContracts = [
+interface Contract {
+  id: string;
+  client_name: string;
+  vehicle: string;
+  policy_number: string;
+  premium_amount: number;
+  start_date: string;
+  end_date: string;
+  status: 'active' | 'pending' | 'expired' | 'cancelled';
+}
+
+const mockContracts: Contract[] = [
   {
     id: '1',
-    vehicle: 'Toyota Corolla',
-    registration_number: '1234 AB 01',
+    client_name: 'Jean Kouassi',
+    vehicle: 'Toyota Corolla 2020',
     policy_number: 'G3A-123456-7890',
     premium_amount: 150000,
-    start_date: '2023-06-01T00:00:00Z',
-    end_date: '2024-05-31T23:59:59Z',
+    start_date: '2023-06-01',
+    end_date: '2024-05-31',
     status: 'active'
   },
   {
     id: '2',
-    vehicle: 'Honda Civic',
-    registration_number: '5678 CD 01',
+    client_name: 'Marie Diallo',
+    vehicle: 'Honda Civic 2019',
     policy_number: 'G3A-234567-8901',
     premium_amount: 180000,
-    start_date: '2023-01-15T00:00:00Z',
-    end_date: '2024-01-14T23:59:59Z',
-    status: 'active'
+    start_date: '2023-01-15',
+    end_date: '2024-01-14',
+    status: 'pending'
   },
   {
     id: '3',
-    vehicle: 'Peugeot 308',
-    registration_number: '9012 EF 01',
+    client_name: 'Koffi Asante',
+    vehicle: 'Nissan Sentra 2021',
     policy_number: 'G3A-345678-9012',
-    premium_amount: 120000,
-    start_date: '2022-11-20T00:00:00Z',
-    end_date: '2023-11-19T23:59:59Z',
+    premium_amount: 165000,
+    start_date: '2022-11-01',
+    end_date: '2023-10-31',
     status: 'expired'
   }
 ];
 
 export function ContractsPage() {
+  const [contracts] = useState<Contract[]>(mockContracts);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const getSortIcon = (field: string) => {
-    if (sortField !== field) return null;
-    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
-  };
-
-  const filteredContracts = mockContracts.filter(contract =>
+  const filteredContracts = contracts.filter(contract =>
     contract.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contract.registration_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    contract.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contract.policy_number.toLowerCase().includes(searchTerm.toLowerCase())
+  ).filter(contract =>
+    statusFilter === 'all' ? true : contract.status === statusFilter
   );
-
-  const activeContracts = filteredContracts.filter(contract => contract.status === 'active');
-  const expiredContracts = filteredContracts.filter(contract => contract.status === 'expired');
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Contrats d'assurance</h1>
           <p className="text-gray-500">
-            Gérez vos contrats d'assurance automobile
+            Gérez tous vos contrats d'assurance automobile
           </p>
         </div>
-        <Button className="shrink-0">
+        <Button>
           <Plus className="w-4 h-4 mr-2" />
           Nouveau contrat
         </Button>
@@ -97,79 +91,82 @@ export function ContractsPage() {
           <Search className="absolute top-0 left-3 h-full text-gray-400" size={18} />
           <Input
             placeholder="Rechercher un contrat..."
-            className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
           />
         </div>
-        <Button variant="outline" className="flex gap-2">
-          <Filter size={18} />
-          Filtrer
-        </Button>
+        <div className="flex gap-2">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="active">Actif</option>
+            <option value="pending">En attente</option>
+            <option value="expired">Expiré</option>
+            <option value="cancelled">Annulé</option>
+          </select>
+          <Button variant="outline">
+            <Filter className="w-4 h-4 mr-2" />
+            Filtres
+          </Button>
+          <Button variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Exporter
+          </Button>
+        </div>
       </div>
 
-      <Tabs defaultValue="active" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="active">Actifs ({activeContracts.length})</TabsTrigger>
-          <TabsTrigger value="expired">Expirés ({expiredContracts.length})</TabsTrigger>
-          <TabsTrigger value="all">Tous ({filteredContracts.length})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="active" className="space-y-4">
-          {activeContracts.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {activeContracts.map((contract) => (
-                <ContractCard key={contract.id} contract={contract} />
-              ))}
-            </div>
-          ) : (
-            <EmptyState />
-          )}
-        </TabsContent>
-
-        <TabsContent value="expired" className="space-y-4">
-          {expiredContracts.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {expiredContracts.map((contract) => (
-                <ContractCard key={contract.id} contract={contract} />
-              ))}
-            </div>
-          ) : (
-            <EmptyState message="Aucun contrat expiré" />
-          )}
-        </TabsContent>
-
-        <TabsContent value="all" className="space-y-4">
-          {filteredContracts.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredContracts.map((contract) => (
-                <ContractCard key={contract.id} contract={contract} />
-              ))}
-            </div>
-          ) : (
-            <EmptyState />
-          )}
-        </TabsContent>
-      </Tabs>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {filteredContracts.map((contract) => (
+          <ContractCard key={contract.id} contract={contract} />
+        ))}
+        {filteredContracts.length === 0 && (
+          <EmptyState message="Aucun contrat trouvé" />
+        )}
+      </div>
     </div>
   );
 }
 
 interface ContractCardProps {
-  contract: {
-    id: string;
-    vehicle: string;
-    registration_number: string;
-    policy_number: string;
-    premium_amount: number;
-    start_date: string;
-    end_date: string;
-    status: string;
-  };
+  contract: Contract;
 }
 
 function ContractCard({ contract }: ContractCardProps) {
   const daysRemaining = contract.status === 'active' ? calculateDaysRemaining(contract.end_date) : 0;
+
+  const getStatusColor = (status: Contract['status']) => {
+    switch (status) {
+      case 'active':
+        return 'bg-teal-100 text-teal-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'expired':
+        return 'bg-red-100 text-red-800';
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: Contract['status']) => {
+    switch (status) {
+      case 'active':
+        return 'Actif';
+      case 'pending':
+        return 'En attente';
+      case 'expired':
+        return 'Expiré';
+      case 'cancelled':
+        return 'Annulé';
+      default:
+        return status;
+    }
+  };
 
   return (
     <Card>
@@ -184,17 +181,13 @@ function ContractCard({ contract }: ContractCardProps) {
               }`} />
             </div>
             <div>
-              <h3 className="text-base font-medium">{contract.vehicle}</h3>
-              <p className="text-sm text-gray-500">{contract.registration_number}</p>
+              <h3 className="text-base font-medium">{contract.client_name}</h3>
+              <p className="text-sm text-gray-500">{contract.vehicle}</p>
             </div>
           </div>
-          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            contract.status === 'active'
-              ? 'bg-teal-100 text-teal-800'
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {contract.status === 'active' ? 'Actif' : 'Expiré'}
-          </span>
+          <Badge variant="outline" className={getStatusColor(contract.status)}>
+            {getStatusText(contract.status)}
+          </Badge>
         </div>
 
         <div className="space-y-3 mb-4">
@@ -205,12 +198,14 @@ function ContractCard({ contract }: ContractCardProps) {
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">Prime annuelle</span>
             <div className="flex items-center gap-1">
+              <CircleDollarSign className="w-3 h-3 text-orange-500" />
               <span className="text-sm font-medium">{formatCurrency(contract.premium_amount)}</span>
             </div>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">Période de validité</span>
             <div className="flex items-center gap-1">
+              <Clock className="w-3 h-3 text-orange-500" />
               <span className="text-sm font-medium">
                 {formatDate(contract.start_date)} - {formatDate(contract.end_date)}
               </span>
@@ -241,6 +236,7 @@ function ContractCard({ contract }: ContractCardProps) {
 
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1 gap-1">
+            <Download className="w-4 h-4" />
             Vignette
           </Button>
           <Button variant={contract.status === 'active' ? 'default' : 'secondary'} className="flex-1">
