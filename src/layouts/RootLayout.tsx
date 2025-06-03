@@ -1,9 +1,16 @@
+
 import { Outlet } from 'react-router-dom';
+import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { useAuthStore } from '@/store/authStore';
 
 export function RootLayout() {
   const { user } = useAuthStore();
+
+  // Si l'utilisateur n'est pas connecté, afficher seulement le contenu (pages publiques)
+  if (!user) {
+    return <Outlet />;
+  }
 
   // Définir les permissions par défaut pour chaque type d'utilisateur
   const hasAgentPermissions = user?.permissions?.includes('manage_clients');
@@ -48,13 +55,10 @@ export function RootLayout() {
     );
   }
 
-  if (!user) {
-    return <Outlet />;
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex min-h-screen">
+      <Header />
+      <div className="flex min-h-[calc(100vh-64px)]">
         <Sidebar navigation={navigation} />
         <main className="flex-1 overflow-y-auto bg-background pl-20 md:pl-20 transition-all duration-300">
           <div className="container mx-auto p-4 md:p-6">
