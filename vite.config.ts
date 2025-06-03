@@ -1,16 +1,21 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { componentTagger } from "lovable-tagger";
 
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    mode === 'development' && componentTagger(),
+  ].filter(Boolean),
   server: {
-    port: 8080, // Port forcé à 3001
-    strictPort: true, // Empêche le basculement vers un autre port si 3001 est occupé
-    host: true, // Permet l'accès depuis le réseau local
+    host: "::",
+    port: 8080,
+    strictPort: true,
   },
   preview: {
-    port: 8080, // Port pour la prévisualisation (npm run preview)
+    port: 8080,
   },
   resolve: {
     alias: {
@@ -24,4 +29,4 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     'process.env.SUPPRESS_ROUTER_WARNINGS': 'true'
   }
-});
+}));
