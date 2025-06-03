@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Camera, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AvatarUpload } from '@/components/ui/avatar-upload';
 import { useAuthStore } from '@/store/authStore';
-import { supabase, getFullName } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export function ProfilePage() {
