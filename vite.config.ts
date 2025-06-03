@@ -1,22 +1,27 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
+  plugins: [react()],
   server: {
-    host: "::",
-    port: 8080,
+    port: 3001, // Port forcé à 3001
+    strictPort: true, // Empêche le basculement vers un autre port si 3001 est occupé
+    host: true, // Permet l'accès depuis le réseau local
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  preview: {
+    port: 3001, // Port pour la prévisualisation (npm run preview)
+  },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-}));
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    'process.env.SUPPRESS_ROUTER_WARNINGS': 'true'
+  }
+});
